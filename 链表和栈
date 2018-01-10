@@ -1,0 +1,144 @@
+#include<iostream>
+
+using namespace std;
+
+template<typename T>
+class mylist
+{
+public:
+	mylist()
+	{
+		_plist = new Node(-1, NULL);
+	}
+	~mylist()
+	{
+		Node *p = _plist->_pnext;
+		while (p != NULL)
+		{
+			_plist->_pnext = p->_pnext;
+			delete p;
+			p = _plist->_pnext;
+		}
+		delete _plist;
+	}
+	void push_back(T val)
+	{
+		Node *ppre = _plist;
+		while (ppre->_pnext != NULL)
+		{
+			ppre = ppre->_pnext;
+		}
+		ppre->_pnext = new Node(val, NULL);
+		
+	}
+	void push_front(T val)
+	{
+		_plist->_pnext = new Node(val, _plist->_pnext);
+	}
+
+	void show()
+	{
+		Node *pcur = _plist->_pnext;
+		while (pcur != NULL)
+		{
+			cout << pcur->_data << endl;
+			pcur = pcur->_pnext;
+		}
+	}
+	bool find(T val)
+	{
+		Node *pcur = _plist->_pnext;
+		while (pcur != NULL)
+		{
+			if (pcur->_data == val) return true;
+			pcur = pcur->_pnext;
+		}
+		return false;
+	}
+
+private:
+	struct Node
+	{
+		Node(T val,Node* p):_data(val),_pnext(p){}
+		T _data;
+		Node *_pnext;
+	};
+	Node *_plist;
+};
+
+template<typename T>
+class mystack
+{
+public:
+	mystack(int size = 20):_account(0),_size(size)
+	{
+		bucket = new T[size];
+	}
+	~mystack()
+	{
+		delete []bucket;
+	}
+	bool full()
+	{
+		return _account == _size;
+	}
+	void push(T val)
+	{
+		if (full())
+		{
+			resize();
+		}
+		bucket[_account++] = val;
+	}
+	
+	T getTop()
+	{
+		return bucket[_account - 1];
+	}
+	
+	void show()
+	{
+		for (int i = 0; i < _account; i++)
+		{
+			cout << bucket[i] << endl;
+		}
+	}
+private:
+	void resize()
+	{
+		T *tmp = new T[_size * 2];
+		for (int i = 0; i < _account; i++)
+		{
+			tmp[i] = bucket[i];
+		}
+		_size *= 2;
+		delete[]bucket;
+		bucket = tmp;
+	}
+	T *bucket;
+	int _account;
+	int _size;
+};
+
+
+int main()
+{
+	/*mylist<int> list1;
+	for (int i = 0; i < 10; i++)
+	{
+		list1.push_front(i);
+	}
+	list1.show();
+	cout << list1.find(19) << endl;*/
+
+	mystack<int> bucket;
+	for (int i = 0; i < 30; i++)
+	{
+		bucket.push(i);
+	}
+	cout << bucket.getTop() << endl << endl;
+	bucket.show();
+
+	
+	return 0;
+}
