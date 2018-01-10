@@ -1,0 +1,231 @@
+/*
+//MazeNode.h
+
+
+#ifndef _MAZENODE_H_
+#define _MAZENODE_H_
+
+class MazeNode
+{
+public:
+	MazeNode(int val = 0,int i = 0,int j = 0):_value(val),_i(i),_j(j)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			_pathState[i] = 1;
+		}
+	}
+	void setCoor(int value, int i, int j)
+	{
+		_value = value;
+		_i = i;
+		_j = j;
+	}
+	int getValue()
+	{
+		return _value;
+	}
+	void setPathState(int path, int state)
+	{
+		_pathState[path] = state;
+	}
+	bool canGo(int way)
+	{
+		return _pathState[way] == 0;
+	}
+	int getrow()
+	{
+		return _i;
+	}
+	int getcol()
+	{
+		return _j;
+	}
+	void setValue(int val)
+	{
+		_value = val;
+	}
+private:
+	int _value;//当前棋子是否存在 0不存在 1存在
+	int _i;//当前棋子横坐标
+	int _j;//当前棋子的纵坐标
+	int _pathState[4];//当前棋子各个方向的状态，能否通过 0号下边表示北边  数组里面存放0或1 0表示可以走 1表示不可以
+};
+
+
+*/
+
+
+
+
+
+
+
+#include<iostream>
+#include<stack>
+#include"MazeNode.h"
+
+using namespace std;
+class Maze
+{
+public:
+	Maze(int r,int c):row(r),col(c)//初始化棋盘
+	{
+		p = new MazeNode*[row];
+		for (int i = 0; i < row; i++)
+		{
+			p[i] = new MazeNode[col];
+		}
+
+		for (int i = 0; i < row; i++)
+		{
+			for (int j = 0; j < col; j++)
+			{
+				p[j][i].setCoor(1,i,j);
+			}
+		}
+	}
+	~Maze()
+	{
+		for (int i = 0; i < row; i++)
+		{
+			delete[]p[i];
+		}
+		delete []p;
+	}
+	void Find()//利用桶寻找路径，把可以走的路存在桶里，如果路通，把桶里的MazeNode的value设置为2
+	{
+		if (p[0][0].getValue() == 1)
+		{
+			cout << "此迷宫无解" << endl;
+			return;
+		}
+		bucket.push(&p[0][0]);
+		int from;//标记进桶Node是从上一次的哪个if里进的，进桶再出桶时方便设置不可行路径的状态
+		while (!bucket.empty() && bucket.top()->getrow() != row - 1 && bucket.top()->getcol() != col - 1)
+		{
+			MazeNode *pNode = bucket.top();
+			if (pNode->canGo(0))//如果东边可以走，即该Node的东状态为0，下同
+			{
+				bucket.push(&p[pNode->getrow()][pNode->getcol() + 1]);//下一个Node入桶
+				p[pNode->getrow()][pNode->getcol() + 1].setPathState(2, 1);//入桶Node的西状态设置为1
+				from = 0;//标记Node进的哪个if
+				continue;
+			}
+			else if (pNode->canGo(1))//南
+			{
+				bucket.push(&p[pNode->getrow()+1][pNode->getcol()]);
+				p[pNode->getrow() + 1][pNode->getcol()].setPathState(3, 1);
+				from = 1;
+				continue;
+			}
+			else if (pNode->canGo(2))//西
+			{
+				bucket.push(&p[pNode->getrow()][pNode->getcol() - 1]);
+				p[pNode->getrow()][pNode->getcol() - 1].setPathState(0, 1);
+				from = 2;
+				continue;
+			}
+			else if (pNode->canGo(3))//北
+			{
+				bucket.push(&p[pNode->getrow() - 1][pNode->getcol()]);
+				p[pNode->getrow() - 1][pNode->getcol()].setPathState(1, 1);
+				from = 3;
+				continue;
+			}
+			else
+			{
+				bucket.pop();
+				bucket.top()->setPathState(from, 1);//假设Node1进桶->Node2进桶（在1的东边），发现Node2无路可走，则把Node1的东状态设置为1
+				from = -1;
+			}
+		}
+		if (!bucket.empty())//出while循环的可能1.桶空 2.走到迷宫右边缘 3.走到迷宫下边缘 除了1，都表示找到出口
+		{
+			cout << "此迷宫有解" << endl;
+			while (!bucket.empty())
+			{
+				bucket.top()->setValue(2);//桶内Node的value都设置为2标记可行路径
+				bucket.pop();
+			}
+		}
+		else
+		{
+			cout << "此迷宫无解" << endl;
+		}
+
+	}
+	void setNode(int row,int col,int data)//输入后设置迷宫的各个节点横纵坐标、值
+	{
+		p[row][col].setCoor(data, row, col);
+	}
+	void showTheMaze()
+	{
+		for (int i = 0; i < row; i++)
+		{
+			for (int j = 0; j < col; j++)
+			{
+				cout << p[i][j].getValue() << " ";
+			}
+			cout << endl;
+		}
+	}
+	void adjustState()
+	{
+		for (int i = 0; i < row; i++)
+		{
+			for (int j = 0; j < col; j++)
+			{
+				if (j + 1 != col && p[i][j + 1].getValue() == 0)
+				{
+					p[i][j].setPathState(0, 0);
+				}
+				if (i + 1 != row && p[i + 1][j].getValue() == 0)
+				{
+					p[i][j].setPathState(1, 0);
+				}
+				if (j != 0 && p[i][j - 1].getValue() == 0)
+				{
+					p[i][j].setPathState(2, 0);
+				}
+				if (i != 0 && p[i - 1][j].getValue() == 0)
+				{
+					p[i][j].setPathState(3, 0);
+				}
+			}
+		}
+	}
+
+private:
+	int row;
+	int col;
+	MazeNode **p;
+	stack<MazeNode*> bucket;//*p 表示一行 **p表示一个棋子
+};
+
+
+int main()
+{
+	int row, col, data;
+
+	cout << "请输入迷宫行列数:";
+	cin >> row >> col;
+
+	Maze maze(row, col);
+
+	cout << "请输入迷宫路径:" << endl;
+
+	for (int i = 0; i<row; ++i)
+	{
+		for (int j = 0; j<col; ++j)
+		{
+			cin >> data;
+			maze.setNode(i,j,data);
+		}
+	}
+	maze.adjustState();
+	maze.Find();
+	maze.showTheMaze();
+
+}
+
