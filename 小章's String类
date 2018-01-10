@@ -1,0 +1,112 @@
+#include<iostream>
+#include<string.h>
+using namespace std;
+
+class String
+{
+public:
+	String(const char* str = NULL)
+	{
+		if (str == NULL)
+		{
+			_pstr = new char;
+			*_pstr = '\0';
+		}
+		else
+		{
+			_pstr = new char[strlen(str) + 1];
+			strncpy_s(_pstr, strlen(str) + 1, str, strlen(str));
+		}
+	}
+	const char& operator[](int n)const
+	{
+		return _pstr[n];
+	}
+	
+	char& operator[](int n)
+	{
+		return _pstr[n];
+	}
+
+	~String()
+	{
+		delete[]_pstr;
+		_pstr = NULL;
+	}
+
+	class iterator
+	{
+	public:
+		iterator(char *p = NULL):_p(p){}
+		bool operator!=(const iterator &it)
+		{
+			return _p != it._p;
+		}
+		void operator++()
+		{
+			_p++;
+		}
+		void operator--()
+		{
+			_p--;
+		}
+		iterator operator+(int size)
+		{
+			return iterator(_p + size);
+		}
+		void operator=(const iterator& it)
+		{
+			_p = it._p;
+		}
+
+		char& operator*()
+		{
+			return *_p;
+		}
+		char *_p;
+	};
+
+	iterator begin()
+	{
+		return iterator(&_pstr[0]);
+	}
+	iterator end()
+	{
+		if (*_pstr == '\0') return iterator(&_pstr[0]);
+		return iterator(&_pstr[strlen(_pstr) + 1]);
+	}
+
+private:
+	char *_pstr;
+};
+
+ostream& operator<<(ostream &os,String& str)
+{
+	String::iterator it= str.begin();
+	for (; it != str.end(); ++it)
+	{
+		os << *it;
+	}
+	return os;
+}
+
+int main()
+{
+	String st1;
+	String::iterator it1 = st1.begin();
+	for (; it1 != st1.end(); ++it1)
+	{
+		cout << *it1;
+	}
+
+	String st2("abdcefg.");
+	/*String::iterator it2 = st2.begin();
+	for (; it2 != st2.end(); ++it2)
+	{
+		cout << *it2;
+	}*/
+	cout << st2;
+
+
+	return 0;
+}
