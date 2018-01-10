@@ -1,0 +1,75 @@
+#include<iostream>
+
+using namespace std;
+
+template <typename T>
+class CGrid {
+public:
+	CGrid(int l = 10, int w = 10) :length(l), width(w)
+	{
+		myboard = new T*[l];
+		for (int i = 0; i < l; i++)
+		{
+			myboard[i] = new T[w];
+		}
+	}
+	CGrid(CGrid &src)
+	{
+		length = src.length;
+		width = src.width;
+		myboard = new T*[length];
+		for (int i = 0; i < length; i++)
+		{
+			myboard[i] = new T[width];
+			for (int j = 0; j < width; j++)
+			{
+				myboard[i][j] = src.myboard[i][j];
+			}
+		}
+	}
+	~CGrid()
+	{
+		for (int i = 0; i < length; i++)
+		{
+			delete[] myboard[i];
+		}
+		myboard = NULL;
+	}
+
+	void insert(int l, int w,T val)
+	{
+		if (l > length || w > width || l == length || w == width)
+			return;
+		myboard[l][w] = val;
+	}
+	void show()
+	{
+		for (int i = 0; i < length; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				cout << myboard[i][j] << " ";
+			}
+			cout << endl;
+		}
+	}
+private:
+	int length;
+	int width;
+	T **myboard;
+};
+
+int main()
+{
+	CGrid<int> myboard(5,5);
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			myboard.insert(i, j, 9);
+		}
+	}
+	CGrid<int> myboard1(myboard);
+	myboard1.show();
+	myboard.show();
+}
